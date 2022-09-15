@@ -32,7 +32,7 @@ public class InputParser
 
         int m = int.Parse(input[line++]);
         UnavailableInterval[] intervals = new UnavailableInterval[m];
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < m; i++)
         {
             string[] data = input[line++].Split(',');
             intervals[i] = new UnavailableInterval();
@@ -40,6 +40,8 @@ public class InputParser
             intervals[i].Duration = double.Parse(data[1]);
         }
 
+        intervals = intervals.OrderBy(x => x.Start).ToArray();
+        
         Input result = new Input();
         result.Files = files;
         result.UnavailableIntervals = intervals;
