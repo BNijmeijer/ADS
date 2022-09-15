@@ -1,7 +1,14 @@
 ﻿namespace ADS;
 
+/// <summary>
+/// An IInput reader that reads input from the console
+/// </summary>
 public class ConsoleInputReader : IInputReader
 {
+    /// <summary>
+    /// Reads the right amount of input from the console such that the program can use the lines
+    /// </summary>
+    /// <returns>The input of the program</returns>
     public string[] ReadInput()
     {
         List<string> lines = new List<string>();

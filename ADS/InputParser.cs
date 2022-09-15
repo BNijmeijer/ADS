@@ -1,24 +1,41 @@
 ﻿namespace ADS;
 
+/// <summary>
+/// The Files that need to be transported
+/// </summary>
 public struct File
 {
     public double Size;
 }
 
+/// <summary>
+/// The unavailable intervals that can happen on the timeline
+/// </summary>
 public struct UnavailableInterval
 {
     public double Start;
     public double Duration;
 }
 
+/// <summary>
+/// Contains all data needed for a program
+/// </summary>
 public struct Input
 {
     public File[] Files;
     public UnavailableInterval[] UnavailableIntervals;
 }
 
+/// <summary>
+/// Parses the input lines of the program
+/// </summary>
 public class InputParser
 {
+    /// <summary>
+    /// Parses the input lines of the program and generates an input struct containing all of the needed information
+    /// </summary>
+    /// <param name="input">The input lines</param>
+    /// <returns>The Input data for the program</returns>
     public static Input Parse(string[] input)
     {
         int line = 0;
