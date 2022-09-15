@@ -1,0 +1,4 @@
+. Overlapping
+. Non-sorted
+. Negative start times
+. Negative duration times
