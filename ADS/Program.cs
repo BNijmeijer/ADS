@@ -1,12 +1,11 @@
 ﻿using System;
-
-namespace ADS
+namespace ADS;
+public class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
-        }
+        IInputReader reader = new ConsoleInputReader();
+        string[] inputLines = reader.ReadInput();
+        Input input = InputParser.Parse(inputLines);
     }
 }
