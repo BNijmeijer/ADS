@@ -8,7 +8,23 @@ public class Program
     /// <param name="args">The commandline arguments</param>
     static void Main(string[] args)
     {
-        IInputReader reader = args.Length > 0 ? new FileInputReader(args[0]) : new ConsoleInputReader();
+        CLIInput cliInput = CLIParser.Parse(args);
+        if (!cliInput.Succes) return;
+        
+        if (cliInput.UseConsole)
+        {
+            RunInput(new ConsoleInputReader());
+            return;
+        }
+
+        for (int i = 0; i < cliInput.Files.Length; i++)
+        {
+            RunInput(new FileInputReader(cliInput.Files[i]));
+        }
+    }
+
+    static void RunInput(IInputReader reader)
+    {
         string[] inputLines = reader.ReadInput();
         Input input = InputParser.Parse(inputLines);
     }
