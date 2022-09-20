@@ -1,5 +1,7 @@
 ﻿using System;
+
 namespace ADS;
+
 public class Program
 {
     /// <summary>
@@ -10,7 +12,7 @@ public class Program
     {
         CLIInput cliInput = CLIParser.Parse(args);
         if (!cliInput.Succes) return;
-        
+
         if (cliInput.UseConsole)
         {
             RunInput(new ConsoleInputReader(), cliInput.Online);

@@ -17,7 +17,7 @@ public struct CLIInput
 public class CLIParser
 {
     private static CLIInput _cliInput = new CLIInput();
-    
+
     /// <summary>
     /// Parses commandline arguments
     /// </summary>
@@ -35,7 +35,8 @@ public class CLIParser
             new Option<bool>("--console", "Whether the program should use the console as input");
 
         Option<string> files =
-            new Option<string>("--files", "What files should be read, separate files with a ';'. Ignored when --console is specified and does not work with --file");
+            new Option<string>("--files",
+                "What files should be read, separate files with a ';'. Ignored when --console is specified and does not work with --file");
         rootCommand.AddOption(files);
 
         rootCommand.SetHandler((onlineValue, consoleValue, filesValue) =>
@@ -52,13 +53,12 @@ public class CLIParser
             _cliInput.Succes = true;
             _cliInput.Online = onlineValue;
             _cliInput.UseConsole = consoleValue;
-            
+
             // don't continue if consoleValue is specified, as --files will be ignored
             if (consoleValue) return;
-            
-            _cliInput.Files = filesValue.Split(';');
 
-        },online, console, files);
+            _cliInput.Files = filesValue.Split(';');
+        }, online, console, files);
 
         rootCommand.Invoke(args);
         return _cliInput;
