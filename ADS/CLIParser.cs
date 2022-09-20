@@ -25,7 +25,7 @@ public class CLIParser
     /// <returns>The output of the commandline</returns>
     public static CLIInput Parse(string[] args)
     {
-        RootCommand rootCommand = new RootCommand("Computes the optimal schedule");
+        RootCommand rootCommand = new RootCommand("Computes the optimal schedule for the Telescope Scheduling Problem");
 
         Option<bool> online =
             new Option<bool>("--online", "Whether the algorithm should run in online or offline mode");
