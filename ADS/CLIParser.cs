@@ -33,6 +33,7 @@ public class CLIParser
 
         Option<bool> console =
             new Option<bool>("--console", "Whether the program should use the console as input");
+        rootCommand.AddOption(console);
 
         Option<string> files =
             new Option<string>("--files",
