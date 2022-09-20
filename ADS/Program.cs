@@ -13,17 +13,17 @@ public class Program
         
         if (cliInput.UseConsole)
         {
-            RunInput(new ConsoleInputReader());
+            RunInput(new ConsoleInputReader(), cliInput.Online);
             return;
         }
 
         for (int i = 0; i < cliInput.Files.Length; i++)
         {
-            RunInput(new FileInputReader(cliInput.Files[i]));
+            RunInput(new FileInputReader(cliInput.Files[i]), cliInput.Online);
         }
     }
 
-    static void RunInput(IInputReader reader)
+    static void RunInput(IInputReader reader, bool online)
     {
         string[] inputLines = reader.ReadInput();
         Input input = InputParser.Parse(inputLines);
