@@ -11,4 +11,10 @@
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="gurobi95.netstandard20">
+      <HintPath>..\..\..\..\..\..\..\..\..\gurobi951\win64\lib\gurobi95.netstandard20.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
