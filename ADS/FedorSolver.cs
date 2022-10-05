@@ -96,6 +96,9 @@ public class FedorSolver : ScheduleSolver
             Tstart[j] = input.UnavailableIntervals[j - 1].Start + input.UnavailableIntervals[j - 1].Duration;
             T[j] = input.UnavailableIntervals[j].Start - Tstart[j];
         }
+        Tstart[m] = input.UnavailableIntervals[m - 1].Start + input.UnavailableIntervals[m - 1].Duration;
+
+        // Make the last interval 'infinitely large'
         double sumsizes = 0;
         for (int i = 0; i < n; i++)
             sumsizes += s[i];
