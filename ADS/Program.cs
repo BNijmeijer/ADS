@@ -13,7 +13,7 @@ public class Program
         CLIInput cliInput = CLIParser.Parse(args);
         if (!cliInput.Succes) return;
 
-        ScheduleSolver solver = null;
+        ScheduleSolver solver = new FedorSolver();
         
         if (cliInput.UseConsole)
         {
