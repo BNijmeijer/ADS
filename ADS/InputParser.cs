@@ -11,10 +11,14 @@ public struct File
 /// <summary>
 /// The unavailable intervals that can happen on the timeline
 /// </summary>
-public struct UnavailableInterval
+public struct UnavailableInterval : IComparable<UnavailableInterval>
 {
     public double Start;
     public double Duration;
+    public int CompareTo(UnavailableInterval other)
+    {
+        return Start.CompareTo(other.Start);
+    }
 }
 
 /// <summary>

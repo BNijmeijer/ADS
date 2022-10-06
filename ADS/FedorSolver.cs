@@ -1,4 +1,5 @@
 ﻿using Gurobi; // I don't know whether this works for you immediately, probably you have to download Gurobi as well.
+using System.Collections.Generic; // For sorting
 
 namespace ADS;
 /// <summary>
@@ -80,6 +81,9 @@ public class FedorSolver : ScheduleSolver
         // Initalise the variables 
         m = input.UnavailableIntervals.Length;
         n = input.Files.Length;
+
+        // Now, we sort the input unavailible intervals on start time
+        Array.Sort(input.UnavailableIntervals);
 
         s = new double[n];
         for (int i = 0; i < n; i++)
