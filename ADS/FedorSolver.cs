@@ -1,5 +1,4 @@
-﻿using Gurobi; // I don't know whether this works for you immediately, probably you have to download Gurobi as well.
-using System.Collections.Generic; // For sorting
+﻿using Gurobi;
 
 namespace ADS;
 /// <summary>
@@ -11,66 +10,65 @@ public class FedorSolver : ScheduleSolver
     /// Class variables
     //////////////////////////////////////////////////////////////////
     
-    protected GRBEnv env;
-    protected GRBModel model;
+    private readonly GRBEnv _env;
+    
+    private GRBModel _model;
 
     /// <summary>
     /// y[j] denotes if T_j is part of the consecutive sequence
     /// </summary>
-    GRBVar[] y;
+    private GRBVar[]? _y;
+    
     /// <summary>
     /// x[i,j] denotes if image f_i is send in interval T_j
     /// </summary>
-    GRBVar[,] x;
+    private GRBVar[,]? _x;
+    
     /// <summary>
     /// T[j] is the length of interval T_j
     /// </summary>
-    double[] T;
+    private double[]? _T;
+    
     /// <summary>
-    /// Tstart[j] is the start time of interval T_j
+    /// TStart[j] is the start time of interval T_j
     /// </summary>
-    double[] Tstart;
+    private double[]? _TStart;
+    
     /// <summary>
     /// s[i] is the size of image f_i
     /// </summary>
-    double[] s;
+    private double[]? _s;
+    
     /// <summary>
-    /// The amount of unavailibility intervals
+    /// The amount of unavailability intervals
     /// </summary>
-    int m;
+    private int _m = 0;
+    
     /// <summary>
-    /// The amound of images
+    /// The number of images
     /// </summary>
-    int n;
+    private int _n = 0;
 
     /// <summary>
-    /// The objetive value of the first optimization phase
+    /// The objective value of the first optimization phase
     /// </summary>
-    int L;
+    private int _L = 0;
 
-    //////////////////////////////////////////////////////////////////
-    /// Main functions of the class
-    //////////////////////////////////////////////////////////////////
+    /*----------------------------------------------------------------------------------------*/
+    /*                            Main functions of the class                                 */
+    /*----------------------------------------------------------------------------------------*/
 
     /// <summary>
     /// Initialising the Gurobi Solver
     /// </summary>
     public FedorSolver()
     {
-        env = new();
-        env.Set("LogFile", "mipi.log");
-        env.Start();
-        model = new(env);
-
-        // And now some ugly initialisation because of compiler-complaints
-        T = new double[0];
-        Tstart = new double[0];
-        s = new double[0];
-        m = 0;
-        n = 0;
-        L = 0;
-
+        _env = new();
+        _env.Set("LogFile", "mipi.log");
+        _env.Start();
+        _model = new(_env);
     }
+    
     /// <summary>
     /// Solves the offline telescoping problem
     /// </summary>
@@ -78,51 +76,52 @@ public class FedorSolver : ScheduleSolver
     /// <param name="result"></param>
     protected override void SolveInput(Input input, ref Result result)
     {
-        // Initalise the variables 
-        m = input.UnavailableIntervals.Length;
-        n = input.Files.Length;
+        // Initialize the variables 
+        _m = input.UnavailableIntervals.Length;
+        _n = input.Files.Length;
 
-        // Now, we sort the input unavailible intervals on start time
+        // Sort the input unavailable intervals on start time
         Array.Sort(input.UnavailableIntervals);
 
-        s = new double[n];
-        for (int i = 0; i < n; i++)
+        _s = new double[_n];
+        for (int i = 0; i < _n; i++)
         {
-            s[i] = input.Files[i].Size;
+            _s[i] = input.Files[i].Size;
         }
 
-        Tstart = new double[m + 1];
-        T = new double[m+1];
-        Tstart[0] = 0;
-        T[0] = input.UnavailableIntervals[0].Start;
-        for (int j = 1; j < m; j++)
+        _TStart = new double[_m + 1];
+        _T = new double[_m+1];
+        _TStart[0] = 0;
+        _T[0] = input.UnavailableIntervals[0].Start;
+        for (int j = 1; j < _m; j++)
         {
-            Tstart[j] = input.UnavailableIntervals[j - 1].Start + input.UnavailableIntervals[j - 1].Duration;
-            T[j] = input.UnavailableIntervals[j].Start - Tstart[j];
+            _TStart[j] = input.UnavailableIntervals[j - 1].Start + input.UnavailableIntervals[j - 1].Duration;
+            _T[j] = input.UnavailableIntervals[j].Start - _TStart[j];
         }
-        Tstart[m] = input.UnavailableIntervals[m - 1].Start + input.UnavailableIntervals[m - 1].Duration;
+        _TStart[_m] = input.UnavailableIntervals[_m - 1].Start + input.UnavailableIntervals[_m - 1].Duration;
 
         // Make the last interval 'infinitely large'
-        double sumsizes = 0;
-        for (int i = 0; i < n; i++)
-            sumsizes += s[i];
-        T[m] = sumsizes;
+        double sumSizes = 0;
+        for (int i = 0; i < _n; i++)
+            sumSizes += _s[i];
+        _T[_m] = sumSizes;
 
         // Solve Stage 1:
         Stage1();
-        L = (int)model.ObjVal; // The objective always is an integer.
-        model.Dispose();
+        _L = (int)_model.ObjVal; // The objective always is an integer.
+        _model.Dispose();
 
-        // Continue to Stage 2:
-        model = new(env);
+        // Solve Stage 2:
+        _model = new(_env);
         Stage2();
 
         // Write out the result
-        result = makeResult();
+        result = MakeResult();
 
-        model.Dispose();
-        env.Dispose();
+        _model.Dispose();
+        _env.Dispose();
     }
+    
     /// <summary>
     /// Stage 1 of the FedorModel
     /// </summary>
@@ -138,9 +137,10 @@ public class FedorSolver : ScheduleSolver
         ImagesFitInIntervalsConstraints1();
 
         // Set the goal, and proceed the optimization
-        model.SetObjective(Goal1(), GRB.MINIMIZE);
-        model.Optimize();
+        _model.SetObjective(Goal1(), GRB.MINIMIZE);
+        _model.Optimize();
     }
+    
     /// <summary>
     /// Stage 2 of the FedorModel
     /// </summary>
@@ -154,47 +154,48 @@ public class FedorSolver : ScheduleSolver
         ImagesFitInIntervalsConstraints2();
 
         // Set the goal, and proceed the optimization
-        model.SetObjective(Goal2(), GRB.MINIMIZE);
-        model.Optimize();
+        _model.SetObjective(Goal2(), GRB.MINIMIZE);
+        _model.Optimize();
     }
+    
     /// <summary>
     /// Makes the result object after the optimization step
     /// </summary>
     /// <returns></returns>
-    Result makeResult()
+    Result MakeResult()
     {
-        Result result = new();
+        Result result = new Result();
 
-        // First we calcluate the total time.
+        // First we calculate the total time.
         // We should therefore add the start time of the last used interval to the cumulative file size in the last interval.
-        result.TotalTime = model.ObjVal + Tstart[L - 1];
+        result.TotalTime = _model.ObjVal + _TStart[_L - 1];
 
         // Now, we want to calculate the transmission times.
         // Therefore, we first make an (ugly code) deep code of an array
-        double[] transmittimes = new double[L];
-        for (int j = 0; j < L; j++)
+        double[] transmitTimes = new double[_L];
+        for (int j = 0; j < _L; j++)
         {
-            transmittimes[j] = Tstart[j];
+            transmitTimes[j] = _TStart[j];
         }
         // For each image, we give it the first possible transmit time in the assigned time interval.
-        result.StartTransmitTimes = new double[n];
-        for (int i = 0; i < n; i++)
+        result.StartTransmitTimes = new double[_n];
+        for (int i = 0; i < _n; i++)
         {
-            for (int j=0; j<L; j++)
+            for (int j=0; j<_L; j++)
             {
-                if (x[i,j].X == 1)
+                if (_x[i,j].X == 1)
                 {
-                    result.StartTransmitTimes[i] = transmittimes[j];
-                    transmittimes[j] += s[i];
+                    result.StartTransmitTimes[i] = transmitTimes[j];
+                    transmitTimes[j] += _s[i];
                 }
             }
         }
         return result;
     }
 
-    //////////////////////////////////////////////////////////////////
-    /// The different constraints and goals which are used as building blocks for ILP-problems
-    //////////////////////////////////////////////////////////////////
+    /*----------------------------------------------------------------------------------------*/
+    /* The different constraints and goals which are used as building blocks for ILP-problems */
+    /*----------------------------------------------------------------------------------------*/
     
     /// <summary>
     /// Sets the goal for Stage 1 of the optimization
@@ -203,121 +204,127 @@ public class FedorSolver : ScheduleSolver
     GRBLinExpr Goal1()
     {
         GRBLinExpr goal = 0;
-        for (int j = 0; j < m + 1; j++)
+        for (int j = 0; j < _m + 1; j++)
         {
-            goal += y[j];
+            goal += _y[j];
         }
         return goal;
     }
-   /// <summary>
-   /// Sets the goal for Stage 2 of the optimzation
-   /// </summary>
-   /// <returns></returns>
+    
+    /// <summary>
+    /// Sets the goal for Stage 2 of the optimzation
+    /// </summary>
+    /// <returns></returns>
     GRBLinExpr Goal2()
     {
         GRBLinExpr goal = 0;
-        for (int i=0; i<n; i++)
+        for (int i=0; i<_n; i++)
         {
-            goal += x[i, L-1] * s[i];
+            goal += _x[i, _L-1] * _s[i];
         }
         return goal;
     }
+   
     /// <summary>
     /// Creates Y decision variables and add them to the model
     /// </summary>
     void CreateYDecisionVariables()
     {
-        y = new GRBVar[m + 1];
-        for (int j = 0; j < m + 1; j++)
+        _y = new GRBVar[_m + 1];
+        for (int j = 0; j < _m + 1; j++)
         {
-            y[j] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "y_" + j.ToString());
+            _y[j] = _model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "y_" + j.ToString());
         }
-
     }
+    
     /// <summary>
     /// Creates X decision variables and add them to the model
     /// </summary>
     void CreateXDecisionVariables()
     {
-        x = new GRBVar[n, m + 1];
-        for (int i = 0; i < n; i++)
+        _x = new GRBVar[_n, _m + 1];
+        for (int i = 0; i < _n; i++)
         {
-            for (int j = 0; j < m + 1; j++)
+            for (int j = 0; j < _m + 1; j++)
             {
-                x[i, j] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "y_" + i.ToString());
+                _x[i, j] = _model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "y_" + i.ToString());
             }
         }
     }
+    
     /// <summary>
     /// y_j \geq y_{j+1}
     /// </summary>
     void FirstIntervalsConstraints()
     {
-        for (int j=0; j<m; j++)
+        for (int j=0; j<_m; j++)
         {
-            model.AddConstr(y[j] >= y[j + 1], "y_" + j.ToString() + ">=y_" + (j + 1).ToString());
+            _model.AddConstr(_y[j] >= _y[j + 1], "y_" + j.ToString() + ">=y_" + (j + 1).ToString());
         }
     }
+    
     /// <summary>
     /// \sum_{j=1}^{m+1}x_{ij} = 1
     /// </summary>
     void ImagesAreSentConstraints1()
     {
-        for (int i=0; i<n; i++)
+        for (int i=0; i<_n; i++)
         {
             GRBLinExpr noOfTimesSend = 0;
-            for (int j=0; j<m+1; j++)
+            for (int j=0; j<_m+1; j++)
             {
-                noOfTimesSend += x[i, j];
+                noOfTimesSend += _x[i, j];
             }
-            model.AddConstr(noOfTimesSend == 1, "Image " + i.ToString() + " is send");
+            _model.AddConstr(noOfTimesSend == 1, "Image " + i.ToString() + " is send");
         }
     }
+    
     /// <summary>
     /// \sum_{j=1}^{L}x_{ij} = 1
     /// </summary>
     void ImagesAreSentConstraints2()
     {
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < _n; i++)
         {
             GRBLinExpr noOfTimesSend = 0;
-            for (int j = 0; j < L; j++)
+            for (int j = 0; j < _L; j++)
             {
-                noOfTimesSend += x[i, j];
+                noOfTimesSend += _x[i, j];
             }
-            model.AddConstr(noOfTimesSend == 1, "Image " + i.ToString() + " is send");
+            _model.AddConstr(noOfTimesSend == 1, "Image " + i.ToString() + " is send");
         }
     }
+    
     /// <summary>
     /// \sum_{i=1}^{n}x_{ij}s_i \leq |T_j| y_j
     /// </summary>
     void ImagesFitInIntervalsConstraints1()
     {
-        for (int j=0; j<m+1; j++)
+        for (int j=0; j<_m+1; j++)
         {
             GRBLinExpr totalSizeSend = 0;
-            for(int i=0; i<n; i++)
+            for(int i=0; i<_n; i++)
             {
-                totalSizeSend += x[i, j] * s[i];
+                totalSizeSend += _x[i, j] * _s[i];
             }
-            model.AddConstr(totalSizeSend <= T[j] * y[j], "Fits in interval " + j.ToString());
+            _model.AddConstr(totalSizeSend <= _T[j] * _y[j], "Fits in interval " + j.ToString());
         }
     }
+    
     /// <summary>
     /// \sum_{i=1}^{n}x_{ij}s_i \leq |T_j|
     /// </summary>
     void ImagesFitInIntervalsConstraints2()
     {
-        for (int j = 0; j < L-1; j++)
+        for (int j = 0; j < _L-1; j++)
         {
             GRBLinExpr totalSizeSend = 0;
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < _n; i++)
             {
-                totalSizeSend += x[i, j] * s[i];
+                totalSizeSend += _x[i, j] * _s[i];
             }
-            model.AddConstr(totalSizeSend <= T[j], "Fits in interval " + j.ToString());
+            _model.AddConstr(totalSizeSend <= _T[j], "Fits in interval " + j.ToString());
         }
     }
-
 }
 
