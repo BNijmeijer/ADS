@@ -17,4 +17,8 @@
     </Reference>
   </ItemGroup>
 
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="copy ..\Gurobi\gurobi95.dll $(OutDir)\gurobi95.dll" />
+  </Target>
+
 </Project>

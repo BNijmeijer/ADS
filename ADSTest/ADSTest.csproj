@@ -20,4 +20,10 @@
     <ProjectReference Include="..\ADS\ADS.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="gurobi95.netstandard20">
+      <HintPath>..\Gurobi\gurobi95.netstandard20.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

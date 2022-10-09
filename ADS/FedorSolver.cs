@@ -116,7 +116,7 @@ public class FedorSolver : ScheduleSolver
         Stage2();
 
         // Write out the result
-        result = MakeResult();
+        MakeResult(ref result);
 
         _model.Dispose();
         _env.Dispose();
@@ -162,10 +162,8 @@ public class FedorSolver : ScheduleSolver
     /// Makes the result object after the optimization step
     /// </summary>
     /// <returns></returns>
-    Result MakeResult()
+    void MakeResult(ref Result result)
     {
-        Result result = new Result();
-
         // First we calculate the total time.
         // We should therefore add the start time of the last used interval to the cumulative file size in the last interval.
         result.TotalTime = _model.ObjVal + _TStart[_L - 1];
@@ -177,8 +175,8 @@ public class FedorSolver : ScheduleSolver
         {
             transmitTimes[j] = _TStart[j];
         }
+        
         // For each image, we give it the first possible transmit time in the assigned time interval.
-        result.StartTransmitTimes = new double[_n];
         for (int i = 0; i < _n; i++)
         {
             for (int j=0; j<_L; j++)
@@ -190,7 +188,6 @@ public class FedorSolver : ScheduleSolver
                 }
             }
         }
-        return result;
     }
 
     /*----------------------------------------------------------------------------------------*/
