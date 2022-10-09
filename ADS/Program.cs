@@ -45,7 +45,7 @@ public class Program
     /// Prints the result to the console
     /// </summary>
     /// <param name="result">The result</param>
-    static void PrintResult(ref Result result)
+    public static void PrintResult(ref Result result)
     {
         Console.WriteLine(result.TotalTime);
         for (int i = 0; i < result.StartTransmitTimes.Length; i++)
