@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace ADS;
 
@@ -13,7 +14,7 @@ public class Program
         CLIInput cliInput = CLIParser.Parse(args);
         if (!cliInput.Succes) return;
 
-        ScheduleSolver solver = null;
+        ScheduleSolver solver = new FedorSolver();
         
         if (cliInput.UseConsole)
         {
@@ -47,10 +48,10 @@ public class Program
     /// <param name="result">The result</param>
     public static void PrintResult(ref Result result)
     {
-        Console.WriteLine(result.TotalTime);
+        Console.WriteLine(result.TotalTime.ToString(CultureInfo.InvariantCulture));
         for (int i = 0; i < result.StartTransmitTimes.Length; i++)
         {
-            Console.WriteLine(result.StartTransmitTimes[i]);
+            Console.WriteLine(result.StartTransmitTimes[i].ToString(CultureInfo.InvariantCulture));
         }
     }
 }

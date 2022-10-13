@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ADS": {
+      "commandName": "Project",
+      "commandLineArgs": "--console"
+    }
+  }
+}

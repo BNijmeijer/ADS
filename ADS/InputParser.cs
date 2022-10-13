@@ -1,4 +1,6 @@
-﻿namespace ADS;
+﻿using System.Globalization;
+
+namespace ADS;
 
 /// <summary>
 /// The Files that need to be transported
@@ -11,10 +13,14 @@ public struct File
 /// <summary>
 /// The unavailable intervals that can happen on the timeline
 /// </summary>
-public struct UnavailableInterval
+public struct UnavailableInterval : IComparable<UnavailableInterval>
 {
     public double Start;
     public double Duration;
+    public int CompareTo(UnavailableInterval other)
+    {
+        return Start.CompareTo(other.Start);
+    }
 }
 
 /// <summary>
@@ -44,7 +50,7 @@ public class InputParser
         for (int i = 0; i < n; i++)
         {
             files[i] = new File();
-            files[i].Size = double.Parse(input[line++]);
+            files[i].Size = double.Parse(input[line++],CultureInfo.InvariantCulture);
         }
 
         int m = int.Parse(input[line++]);
@@ -53,8 +59,8 @@ public class InputParser
         {
             string[] data = input[line++].Split(',');
             intervals[i] = new UnavailableInterval();
-            intervals[i].Start = double.Parse(data[0]);
-            intervals[i].Duration = double.Parse(data[1]);
+            intervals[i].Start = double.Parse(data[0],CultureInfo.InvariantCulture);
+            intervals[i].Duration = double.Parse(data[1],CultureInfo.InvariantCulture);
         }
 
         intervals = intervals.OrderBy(x => x.Start).ToArray();

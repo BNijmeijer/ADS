@@ -46,7 +46,7 @@ public class SolverTests
         string filepath = FindFilePath(file);
         Input input = GetInput(new FileInputReader(filepath));
 
-        ScheduleSolver solver = null;
+        ScheduleSolver solver = new FedorSolver();
         Result result = solver.Solve(input);
         Program.PrintResult(ref result);
     }
