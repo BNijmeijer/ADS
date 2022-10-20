@@ -39,19 +39,7 @@ public class Program
         string[] inputLines = reader.ReadInput();
         Input input = InputParser.Parse(inputLines);
         Result result = solver.Solve(input);
-        PrintResult(ref result);
-    }
-
-    /// <summary>
-    /// Prints the result to the console
-    /// </summary>
-    /// <param name="result">The result</param>
-    public static void PrintResult(ref Result result)
-    {
-        Console.WriteLine(result.TotalTime.ToString(CultureInfo.InvariantCulture));
-        for (int i = 0; i < result.StartTransmitTimes.Length; i++)
-        {
-            Console.WriteLine(result.StartTransmitTimes[i].ToString(CultureInfo.InvariantCulture));
-        }
+        OuptutWriter ouptutWriter = new ConsoleWriter();
+        ouptutWriter.Write(ref result);
     }
 }
