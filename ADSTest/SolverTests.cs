@@ -84,6 +84,9 @@ public class SolverTests
         return InputParser.Parse(inputLines);
     }
 
+    /// <summary>
+    /// Small epsilon for double checking
+    /// </summary>
     private const double epsilon = 0.0001;
 
     /// <summary>
