@@ -6,10 +6,18 @@ namespace ADSTest;
 
 public class SolverTests
 {
+    /// <summary>
+    /// Find a file in a directory
+    /// </summary>
+    /// <param name="directory">The directory to search in</param>
+    /// <param name="file">The file to look for</param>
+    /// <returns>The path to the file</returns>
     static string FindFilePathWithDir(string directory, string file)
     {
+        // Check from the root of the computer
         if (File.Exists(file)) return file;
 
+        // Check in the current environment directory
         string workingDirectory = Environment.CurrentDirectory;
         string testcaseDirectory = workingDirectory + "\\" + directory + "\\";
         if (Directory.Exists(testcaseDirectory) && File.Exists(testcaseDirectory + file))
@@ -17,6 +25,7 @@ public class SolverTests
             return testcaseDirectory + file;
         }
 
+        // Check in the current project directory
         string projectDirectory = Directory.GetParent(workingDirectory).Parent.Parent.FullName;
         testcaseDirectory = projectDirectory + "\\" + directory + "\\";
         if (Directory.Exists(testcaseDirectory) && File.Exists(testcaseDirectory + file))
@@ -24,6 +33,7 @@ public class SolverTests
             return testcaseDirectory + file;
         }
 
+        // Check in the current solution directory
         string solutionDirectory = Directory.GetParent(projectDirectory).FullName;
         testcaseDirectory = solutionDirectory + "\\" + directory + "\\";
         if (Directory.Exists(testcaseDirectory) && File.Exists(testcaseDirectory + file))
@@ -31,24 +41,43 @@ public class SolverTests
             return testcaseDirectory + file;
         }
 
-        return file;
+        // File was not found, cannot continue if it is not there
+        throw new Exception("File was not found");
     }
 
+    /// <summary>
+    /// Search a file in the TestCases folder
+    /// </summary>
+    /// <param name="file">The file that needs to be searched</param>
+    /// <returns>The path to the file</returns>
     static string FindFilePathStandard(string file)
     {
         return FindFilePathWithDir("TestCases", file);
     }
 
+    /// <summary>
+    /// Finds the file path of an input file, of which the output was hand computed
+    /// </summary>
+    /// <param name="file">The file that needs to be searched</param>
+    /// <returns>The path to the file</returns>
     static string FindFilePathInput(string file)
     {
         return FindFilePathWithDir("test_sets\\input", file);
     }
 
+    /// <summary>
+    /// Finds the file path of an output file, that was hand computed
+    /// </summary>
+    /// <param name="file">The file that needs to be searched</param>
+    /// <returns>The path to the file</returns>
     static string FindFilePathOutput(string file)
     {
         return FindFilePathWithDir("test_sets\\output", file);
     }
 
+    /// <summary>
+    /// Retrieves the input from an input reader
+    /// </summary>
     static Input GetInput(IInputReader inputReader)
     {
         string[] inputLines = inputReader.ReadInput();
@@ -57,10 +86,18 @@ public class SolverTests
 
     private const double epsilon = 0.0001;
 
+    /// <summary>
+    /// Check if two doubles are equal, keeping in mind that doubles might have
+    /// precision problems
+    /// </summary>
     static bool DoubleIsEqual(double d1, double d2)
     {
         return d1 - epsilon <= d2 && d1 + epsilon >= d2;
     }
+    
+    /// <summary>
+    /// Check if two results are equal to each other
+    /// </summary>
     static bool ResultIsEqual(Result r1, Result r2)
     {
         // Check if the total time is equal
@@ -72,6 +109,12 @@ public class SolverTests
         return true;
     }
         
+    /// <summary>
+    /// Does not test, but runs for all of our testcases and writes the output to a file.
+    /// This is for ease of use only, such that we can press the 'run all tests' button
+    /// to test for all of our test cases.
+    /// </summary>
+    /// <param name="file">The file to test for</param>
     [Test]
     public void TestFiles(
         [Values("test1.txt", "test2.txt", "test3.txt", "test4.txt", "test5.txt")]
@@ -88,6 +131,10 @@ public class SolverTests
         ouptutWriter.Write(ref result);
     }
 
+    /// <summary>
+    /// Tests our program against some hand computed optimal solutions
+    /// </summary>
+    /// <param name="file">The file to test</param>
     [Test]
     public void TestFilesWithAnser(
         [Values("test1.txt", "test2.txt")] 

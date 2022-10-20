@@ -2,9 +2,17 @@
 
 namespace ADS;
 
+/// <summary>
+/// A writer that can print a result to a file
+/// </summary>
 public class FileWriter : OuptutWriter
 {
     private string _file;
+    
+    /// <summary>
+    /// Constructor to initialize the path to the file that needs to be written to
+    /// </summary>
+    /// <param name="file">The file to write to</param>
     public FileWriter(string file)
     {
         _file = file;
