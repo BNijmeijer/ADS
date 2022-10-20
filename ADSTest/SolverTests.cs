@@ -56,7 +56,7 @@ public class SolverTests
     }
 
     /// <summary>
-    /// Finds the file path of an input file, of which the output was hand computed
+    /// Finds the file path of an input file, of which the output was pre computed
     /// </summary>
     /// <param name="file">The file that needs to be searched</param>
     /// <returns>The path to the file</returns>
@@ -66,7 +66,7 @@ public class SolverTests
     }
 
     /// <summary>
-    /// Finds the file path of an output file, that was hand computed
+    /// Finds the file path of an output file, that was pre computed
     /// </summary>
     /// <param name="file">The file that needs to be searched</param>
     /// <returns>The path to the file</returns>
@@ -93,18 +93,18 @@ public class SolverTests
     /// Check if two doubles are equal, keeping in mind that doubles might have
     /// precision problems
     /// </summary>
-    static bool DoubleIsEqual(double d1, double d2)
+    static bool DoubleIsLessEqual(double d1, double d2)
     {
-        return d1 - epsilon <= d2 && d1 + epsilon >= d2;
+        return d1 <= d2 + epsilon;
     }
     
     /// <summary>
     /// Check if two results are equal to each other
     /// </summary>
-    static bool ResultIsEqual(Result r1, Result r2)
+    static bool ResultIsLessEqual(Result r1, Result r2)
     {
         // Check if the total time is equal
-        if (!DoubleIsEqual(r1.TotalTime,r2.TotalTime)) return false;
+        if (!DoubleIsLessEqual(r1.TotalTime,r2.TotalTime)) return false;
         if (r1.StartTransmitTimes.Length != r2.StartTransmitTimes.Length) return false;
         
         // We do not have to check the solution as multiple solutions can have the same time
@@ -135,14 +135,14 @@ public class SolverTests
     }
 
     /// <summary>
-    /// Tests our program against some hand computed optimal solutions
+    /// Tests our program against some computed optimal solutions
     /// </summary>
-    /// <param name="file">The file to test</param>
+    /// <param name="fileNum">The number of the file to test</param>
     [Test]
-    public void TestFilesWithAnser(
-        [Values("test1.txt", "test2.txt")] 
-        string file)
+    public void TestFilesWithAnswer(
+        [Range(0,150)] int fileNum)
     {
+        string file = "test" + fileNum.ToString() + ".txt";
         string inputPath = FindFilePathInput(file);
         Input input = GetInput(new FileInputReader(inputPath));
 
@@ -161,6 +161,10 @@ public class SolverTests
             expectedResult.StartTransmitTimes[i - 1] = double.Parse(lines[i], CultureInfo.InvariantCulture);
         }
         
-        Assert.True(ResultIsEqual(result,expectedResult));
+        outputPath = inputPath.Substring(0, inputPath.Length - 4) + "output.txt";
+        OuptutWriter ouptutWriter = new FileWriter(outputPath);
+        ouptutWriter.Write(ref result);
+        
+        Assert.True(ResultIsLessEqual(result,expectedResult));
     }
 }
