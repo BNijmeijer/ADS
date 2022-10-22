@@ -17,10 +17,13 @@ public struct UnavailableInterval : IComparable<UnavailableInterval>
 {
     public double Start;
     public double Duration;
+
     public int CompareTo(UnavailableInterval other)
     {
         return Start.CompareTo(other.Start);
     }
+
+    public double End => Start + Duration;
 }
 
 /// <summary>

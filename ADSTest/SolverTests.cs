@@ -1,5 +1,7 @@
 using System.Globalization;
+using System.Transactions;
 using ADS;
+using NUnit.Framework.Constraints;
 using File = System.IO.File;
 
 namespace ADSTest;
@@ -111,6 +113,60 @@ public class SolverTests
 
         return true;
     }
+
+    /// <summary>
+    /// Checks whether two intervals [x1,x2) and [y1,y2) overlap
+    /// </summary>
+    static bool AreOverlapping(decimal x1, decimal x2, decimal y1, decimal y2)
+    {        
+        return x1 < y2 && y1 < x2;    
+    }
+
+    /// <summary>
+    /// Checks whether a resulting output is valid given the problem input.
+    /// This is done by checken whether sent messages overlap with eachother and/or unavailable intervals.
+    /// </summary>
+    static bool IsValidResult(Input testInput, Result testOutput)
+    {
+        // There must be files to send
+        if(testInput.Files.Length == 0) return false;
+
+        // Construct the list of messages ordered on the time they are sent.
+        var msgIdsSendOrder = testOutput.StartTransmitTimes
+            .Select((t, id) => (id, tStart: (decimal)t, tEnd: (decimal)t + (decimal)testInput.Files[id].Size))
+            .OrderBy(msg => msg.tStart)
+            .ToList();
+
+        // Check whether all messages are sent at a feasible time.
+        for (int i = 0; i < msgIdsSendOrder.Count; i++)
+        {
+            (int id, decimal tStart, decimal tEnd) msg = msgIdsSendOrder[i];
+
+            // Check whether the message overlaps with any unavailable interval
+            foreach (UnavailableInterval interval in testInput.UnavailableIntervals)
+            {
+                if (AreOverlapping(msg.tStart, msg.tEnd, (decimal) interval.Start, (decimal) interval.End))
+                {
+                    Console.WriteLine(
+                        $"Message id={msg.id} sent at [{msg.tStart} ~ {msg.tEnd}) " +
+                        $"overlaps with the unavailable interval [{interval.Start} ~ {interval.End})");
+                    return false;
+                }
+            }
+
+            // Check whether the message overlaps with the next message to be sent
+            (int id, decimal tStart, decimal tEnd) nextMsg;
+            if (i < msgIdsSendOrder.Count - 1 && msg.tEnd > (nextMsg = msgIdsSendOrder[i + 1]).tStart)
+            {
+                Console.WriteLine(
+                    $"Message id={msg.id} sent at [{msg.tStart} ~ {msg.tEnd}) " +
+                    $"overlaps with the next message id={nextMsg.id} sent at [{nextMsg.tStart} ; {nextMsg.tEnd})");
+                return false;
+            }
+        }
+      
+        return true;
+    }
         
     /// <summary>
     /// Does not test, but runs for all of our testcases and writes the output to a file.
@@ -161,11 +217,14 @@ public class SolverTests
         {
             expectedResult.StartTransmitTimes[i - 1] = double.Parse(lines[i], CultureInfo.InvariantCulture);
         }
-        
+
         outputPath = inputPath.Substring(0, inputPath.Length - 4) + "output.txt";
         OuptutWriter ouptutWriter = new FileWriter(outputPath);
         ouptutWriter.Write(ref result);
-        
-        Assert.True(ResultIsLessEqual(result,expectedResult));
+
+        // Check whether the given testcase is valid.
+        Assert.True(IsValidResult(input, expectedResult));
+
+        Assert.True(ResultIsLessEqual(result, expectedResult));
     }
 }
