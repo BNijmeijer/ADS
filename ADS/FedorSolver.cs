@@ -65,6 +65,8 @@ public class FedorSolver : ScheduleSolver
     {
         _env = new();
         _env.Set("LogFile", "mipi.log");
+        _env.MIPGap = 1.00e-7;
+        _env.MIPGapAbs = 1.00e-4;
         _env.Start();
         _model = new(_env);
     }
@@ -181,7 +183,7 @@ public class FedorSolver : ScheduleSolver
         {
             for (int j=0; j<_L; j++)
             {
-                if (_x[i,j].X == 1)
+                if (_x[i,j].X >= 0.5)// X should be 0 or 1, but rounding errors occur
                 {
                     result.StartTransmitTimes[i] = transmitTimes[j];
                     transmitTimes[j] += _s[i];
