@@ -45,7 +45,7 @@ public class CLIParser
             // need to specify an input type
             if (filesValue == null && !consoleValue)
             {
-                Console.WriteLine("You need to specify --console, --file or --files");
+                Console.WriteLine("You need to specify --console or --files");
                 _cliInput.Succes = false;
                 return;
             }
