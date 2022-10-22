@@ -1,7 +1,5 @@
 using System.Globalization;
-using System.Transactions;
 using ADS;
-using NUnit.Framework.Constraints;
 using File = System.IO.File;
 
 namespace ADSTest;
@@ -223,8 +221,8 @@ public class SolverTests
         ouptutWriter.Write(ref result);
 
         // Check whether the given testcase is valid.
-        Assert.True(IsValidResult(input, expectedResult));
+        Assert.True(IsValidResult(input, result));
 
-        Assert.True(ResultIsLessEqual(result, expectedResult));
+        Assert.True(ResultIsLessEqual(result, expectedResult) || !IsValidResult(input,expectedResult));
     }
 }
