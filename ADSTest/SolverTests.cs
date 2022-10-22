@@ -220,9 +220,10 @@ public class SolverTests
         OuptutWriter ouptutWriter = new FileWriter(outputPath);
         ouptutWriter.Write(ref result);
 
-        // Check whether the given testcase is valid.
+        // Check our result is valid.
         Assert.True(IsValidResult(input, result));
 
+        // Check if our result is better or the same as the expected result, or if the expected result is invalid
         Assert.True(ResultIsLessEqual(result, expectedResult) || !IsValidResult(input,expectedResult));
     }
 }
